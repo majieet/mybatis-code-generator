@@ -1,17 +1,4 @@
-package com.greenline.test;/*
- * Project: test
- * 
- * File Created at 2014-12-23
- 
- * Copyright 2012 Greenline.com Corporation Limited.
- * All rights reserved.
- *
- * This software is the confidential and proprietary information of
- * Greenline Company. ("Confidential Information").  You shall not
- * disclose such Confidential Information and shall use it only in
- * accordance with the terms of the license agreement you entered into
- * with Greenline.com.
- */
+package com.greenline.test;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -35,8 +22,8 @@ public class TestMBG {
     public void TestGenerateFile() throws Exception{
         List<String> warnings = new ArrayList<String>();
         final boolean overwrite = true;
-        File configFile = new File("D:\\项目\\2015\\code\\mybatis-generator_org.xml");
-//        File configFile = new File("D:\\项目\\2015\\code\\mybatis-generator-ouer.xml");
+        File configFile = new File("F:\\share\\code\\mybatis-generator_org.xml");
+//        File configFile = new File("F:\\share\\code\\mybatis-generator-ouer.xml");
         ConfigurationParser cp = new ConfigurationParser(warnings);
         Configuration configuration = cp.parseConfiguration(configFile);
         DefaultShellCallback callback = new DefaultShellCallback(overwrite);
