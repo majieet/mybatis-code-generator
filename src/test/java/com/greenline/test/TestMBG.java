@@ -17,13 +17,14 @@ import org.mybatis.generator.internal.DefaultShellCallback;
  * @since 2014-12-23 18:07
  */
 public class TestMBG {
+    //java -jar mybatis-generator-core-1.3.2.jar -configfile mybatis-generator_org.xml -overwrite
 
     @Test
     public void TestGenerateFile() throws Exception{
         List<String> warnings = new ArrayList<String>();
         final boolean overwrite = true;
-        File configFile = new File("F:\\share\\code\\mybatis-generator_org.xml");
-//        File configFile = new File("F:\\share\\code\\mybatis-generator-ouer.xml");
+//        File configFile = new File("F:\\share\\code\\mybatis-generator_org.xml");
+        File configFile = new File("F:\\share\\code\\mybatis-generator-ouer.xml");
         ConfigurationParser cp = new ConfigurationParser(warnings);
         Configuration configuration = cp.parseConfiguration(configFile);
         DefaultShellCallback callback = new DefaultShellCallback(overwrite);

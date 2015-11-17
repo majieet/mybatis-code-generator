@@ -60,15 +60,20 @@ public class OuerMapperGenerator extends AbstractJavaClientGenerator {
 
         if(StringUtility.stringHasValue(rootInterface)) {
             FullyQualifiedJavaType answer = new FullyQualifiedJavaType(rootInterface);
+            FullyQualifiedJavaType returnType = introspectedTable.getRules()
+                    .calculateAllFieldsClass();
+            answer.addTypeArgument(returnType);
+            answer.addTypeArgument(FullyQualifiedJavaType.getStringInstance());
+
             interfaze.addSuperInterface(answer);
             interfaze.addImportedType(answer);
         }
 
-        this.addSelectByPrimaryKeyMethod(interfaze);
-        this.addInsertMethod(interfaze);
-        this.addDeleteByPrimaryKeyMethod(interfaze);
-        this.addUpdateByPrimaryKeySelectiveMethod(interfaze);
-        this.addListMethod(interfaze);
+//        this.addSelectByPrimaryKeyMethod(interfaze);
+//        this.addInsertMethod(interfaze);
+//        this.addDeleteByPrimaryKeyMethod(interfaze);
+//        this.addUpdateByPrimaryKeySelectiveMethod(interfaze);
+//        this.addListMethod(interfaze);
         ArrayList answer1 = new ArrayList();
         if(this.context.getPlugins().clientGenerated(interfaze, (TopLevelClass)null, this.introspectedTable)) {
             answer1.add(interfaze);

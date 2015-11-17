@@ -1,6 +1,5 @@
 package com.ouer.tools.generator.plugins;
 
-import com.ouer.tools.generator.code.OuerMyBatis3FormattingUtilities;
 import org.mybatis.generator.api.CommentGenerator;
 import org.mybatis.generator.api.GeneratedJavaFile;
 import org.mybatis.generator.api.IntrospectedTable;
@@ -10,25 +9,26 @@ import org.mybatis.generator.internal.util.StringUtility;
 import org.mybatis.generator.internal.util.messages.Messages;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by xuanwu on 2015/6/29.
  */
 public class ServicePlugin extends PluginAdapter {
     private List<Interface> interfaceList = new ArrayList<Interface>();
-    private Map<String, TopLevelClass> modelDaoMap = new HashMap<String, TopLevelClass>();
     private String targetProject;
     private String servicePackage;
     private String serviceImplPackage;
+    private String serviceRootInterface;
+    private String serviceImplAbstractClass;
 
     @Override
     public boolean validate(List<String> warnings) {
         targetProject = this.properties.getProperty("targetProject");
         servicePackage = this.properties.getProperty("servicePackage");
         serviceImplPackage = this.properties.getProperty("serviceImplPackage");
+        serviceRootInterface = this.properties.getProperty("serviceRootInterface");
+        serviceImplAbstractClass = this.properties.getProperty("serviceImplAbstractClass");
 
         boolean valid = true;
         if (!StringUtility.stringHasValue(targetProject)) {
@@ -53,14 +53,14 @@ public class ServicePlugin extends PluginAdapter {
     public List<GeneratedJavaFile> contextGenerateAdditionalJavaFiles(IntrospectedTable introspectedTable) {
         ArrayList result = new ArrayList();
         for (Interface interfaze : interfaceList) {
-            //生成Mgr代码
-            Interface mgrInterface = this.generatorMgr(interfaze);
-            GeneratedJavaFile gafMgr = new GeneratedJavaFile(mgrInterface, targetProject, "utf-8",
+            //生成Service代码
+            Interface serviceInterface = this.generatorService(introspectedTable,interfaze);
+            GeneratedJavaFile gafMgr = new GeneratedJavaFile(serviceInterface, targetProject, "utf-8",
                     this.context.getJavaFormatter());
             result.add(gafMgr);
-            //生成MgrImpl代码
+            //生成ServiceImpl代码
             GeneratedJavaFile gafMgrImpl = new GeneratedJavaFile(
-                    this.generatorMgrImpl(interfaze, mgrInterface), targetProject, "utf-8",
+                    this.generatorServiceImpl(introspectedTable, interfaze, serviceInterface), targetProject, "utf-8",
                     this.context.getJavaFormatter());
             result.add(gafMgrImpl);
 
@@ -68,45 +68,52 @@ public class ServicePlugin extends PluginAdapter {
         return result;
     }
 
-    private Interface generatorMgr(Interface daoInterface) {
+    private Interface generatorService(IntrospectedTable introspectedTable,Interface daoInterface) {
         String daoName = daoInterface.getType().getShortName();
         String serviceName = daoName.substring(0, daoName.length() - 6) + "Service";
         FullyQualifiedJavaType type = new FullyQualifiedJavaType(servicePackage + "." + serviceName);
         Interface interfaze = new Interface(type);
         interfaze.setVisibility(JavaVisibility.PUBLIC);
-        interfaze.addImportedType(FullyQualifiedJavaType.getNewListInstance());
+
+        if(StringUtility.stringHasValue(serviceRootInterface)) {
+            FullyQualifiedJavaType answer = new FullyQualifiedJavaType(serviceRootInterface);
+            FullyQualifiedJavaType returnType = introspectedTable.getRules()
+                    .calculateAllFieldsClass();
+            answer.addTypeArgument(returnType);
+            answer.addTypeArgument(FullyQualifiedJavaType.getStringInstance());
+
+            interfaze.addSuperInterface(answer);
+            interfaze.addImportedType(answer);
+            interfaze.addImportedType(returnType);
+        }
 
         CommentGenerator commentGenerator = context.getCommentGenerator();
         commentGenerator.addJavaFileComment(interfaze);
         return interfaze;
     }
 
-    private TopLevelClass generatorMgrImpl(Interface daoInterface, Interface serviceInterface) {
+    private TopLevelClass generatorServiceImpl(IntrospectedTable introspectedTable,Interface daoInterface, Interface serviceInterface) {
         String daoName = daoInterface.getType().getShortName();
         String serviceImplName = daoName.substring(0, daoName.length() - 6) + "ServiceImpl";
-        TopLevelClass poClass = modelDaoMap.get(daoName);
-        String poName = poClass.getType().getShortName();
-        String poCaseName = OuerMyBatis3FormattingUtilities.getFirstLowerCaseString(poName);
-        FullyQualifiedJavaType daoType = daoInterface.getType();
-        String daoCaseName = OuerMyBatis3FormattingUtilities.getFirstLowerCaseString(daoType.getShortName());
-
-
         FullyQualifiedJavaType type = new FullyQualifiedJavaType(serviceImplPackage + "." + serviceImplName);
         TopLevelClass topLevelClass = new TopLevelClass(type);
         topLevelClass.addSuperInterface(serviceInterface.getType());
         topLevelClass.setVisibility(JavaVisibility.PUBLIC);
         topLevelClass.addImportedType(serviceInterface.getType());
-        topLevelClass.addImportedType(daoInterface.getType());
-        topLevelClass.addImportedType(poClass.getType());
-        topLevelClass.addImportedType("org.springframework.beans.factory.annotation.Autowired");
         topLevelClass.addImportedType("org.springframework.stereotype.Service");
-        topLevelClass.addImportedType("java.util.List");
+        topLevelClass.addAnnotation("@Service");
 
-        topLevelClass.addAnnotation("@Service(\"" + OuerMyBatis3FormattingUtilities
-                .getFirstLowerCaseString(serviceInterface.getType().getShortName()) + "\")");
-        Field mapperField = new Field(daoCaseName, daoType);
-        mapperField.addAnnotation("@Autowired");
-        topLevelClass.addField(mapperField);
+        if(StringUtility.stringHasValue(serviceImplAbstractClass)) {
+            FullyQualifiedJavaType answer = new FullyQualifiedJavaType(serviceImplAbstractClass);
+            FullyQualifiedJavaType returnType = introspectedTable.getRules()
+                    .calculateAllFieldsClass();
+            answer.addTypeArgument(returnType);
+            answer.addTypeArgument(FullyQualifiedJavaType.getStringInstance());
+
+            topLevelClass.setSuperClass(answer);
+            topLevelClass.addImportedType(answer);
+            topLevelClass.addImportedType(returnType);
+        }
 
         CommentGenerator commentGenerator = context.getCommentGenerator();
         commentGenerator.addJavaFileComment(topLevelClass);
@@ -117,14 +124,6 @@ public class ServicePlugin extends PluginAdapter {
     public boolean clientGenerated(Interface interfaze, TopLevelClass topLevelClass,
                                    IntrospectedTable introspectedTable) {
         interfaceList.add(interfaze);
-        return true;
-    }
-
-    @Override
-    public boolean modelBaseRecordClassGenerated(TopLevelClass topLevelClass, IntrospectedTable introspectedTable) {
-        String modelName = topLevelClass.getType().getShortName();
-        String daoName = modelName + "Mapper";
-        modelDaoMap.put(daoName, topLevelClass);
         return true;
     }
 }
