@@ -57,7 +57,7 @@ public class ListGenerator extends AbstractXmlElementGenerator {
         dynamicElement.addAttribute(new Attribute("prefix", "where"));
         dynamicElement.addAttribute(new Attribute("prefixOverrides", "AND|OR"));
         answer.addElement(dynamicElement);
-        Iterator and = this.introspectedTable.getNonPrimaryKeyColumns().iterator();
+        Iterator and = this.introspectedTable.getAllColumns().iterator();
 
         while(and.hasNext()) {
             IntrospectedColumn i$ = (IntrospectedColumn)and.next();

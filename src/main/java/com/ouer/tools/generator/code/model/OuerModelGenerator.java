@@ -188,7 +188,9 @@ public class OuerModelGenerator extends AbstractJavaGenerator {
             IntrospectedColumn introspectedColumn = it.next();
             if(introspectedColumn.getActualColumnName().equals("id")
                     ||introspectedColumn.getActualColumnName().equals("created_at")
-                    ||introspectedColumn.getActualColumnName().equals("updated_at")){
+                    ||introspectedColumn.getActualColumnName().equals("updated_at")
+                    ||introspectedColumn.getActualColumnName().equals("created_id")
+                    ||introspectedColumn.getActualColumnName().equals("updated_id")){
                 it.remove();
             }
         }
