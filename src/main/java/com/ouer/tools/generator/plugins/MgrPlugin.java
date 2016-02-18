@@ -26,6 +26,7 @@ import org.mybatis.generator.internal.util.messages.Messages;
  * @version V1.0
  * @since 2015-01-12 16:22
  */
+@Deprecated
 public class MgrPlugin extends PluginAdapter {
     private List<Interface> interfaceList = new ArrayList<Interface>();
     private Map<String, TopLevelClass> modelDaoMap = new HashMap<String, TopLevelClass>();
