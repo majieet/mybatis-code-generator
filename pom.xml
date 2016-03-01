@@ -66,12 +66,12 @@
         <snapshotRepository>
             <id>snapshots</id>
             <name>artifactory</name>
-            <url>http://115.236.11.98:8081/nexus/content/repositories/snapshots/</url>
+            <url>http://nexus.ixiaopu.com:8081/nexus/content/repositories/snapshots/</url>
         </snapshotRepository>
         <repository>
             <id>releases</id>
             <name>artifactory</name>
-            <url>http://115.236.11.98:8081/nexus/content/repositories/releases/</url>
+            <url>http://nexus.ixiaopu.com:8081/nexus/content/repositories/releases/</url>
         </repository>
     </distributionManagement>
 
