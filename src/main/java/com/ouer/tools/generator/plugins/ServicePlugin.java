@@ -15,7 +15,7 @@ import java.util.List;
  * Created by xuanwu on 2015/6/29.
  */
 public class ServicePlugin extends PluginAdapter {
-    private List<Interface> interfaceList = new ArrayList<Interface>();
+    private List<ServiceBean> serviceBeanList = new ArrayList<ServiceBean>();
     private String targetProject;
     private String servicePackage;
     private String serviceImplPackage;
@@ -50,9 +50,11 @@ public class ServicePlugin extends PluginAdapter {
     }
 
     @Override
-    public List<GeneratedJavaFile> contextGenerateAdditionalJavaFiles(IntrospectedTable introspectedTable) {
+    public List<GeneratedJavaFile> contextGenerateAdditionalJavaFiles() {
         ArrayList result = new ArrayList();
-        for (Interface interfaze : interfaceList) {
+        for (ServiceBean serviceBean : serviceBeanList) {
+            Interface interfaze = serviceBean.getInterface();
+            IntrospectedTable introspectedTable = serviceBean.getIntrospectedTable();
             //生成Service代码
             Interface serviceInterface = this.generatorService(introspectedTable,interfaze);
             GeneratedJavaFile gafMgr = new GeneratedJavaFile(serviceInterface, targetProject, "utf-8",
@@ -123,7 +125,31 @@ public class ServicePlugin extends PluginAdapter {
     @Override
     public boolean clientGenerated(Interface interfaze, TopLevelClass topLevelClass,
                                    IntrospectedTable introspectedTable) {
-        interfaceList.add(interfaze);
+        ServiceBean serviceBean = new ServiceBean();
+        serviceBean.setInterface(interfaze);
+        serviceBean.setIntrospectedTable(introspectedTable);
+        serviceBeanList.add(serviceBean);
         return true;
+    }
+
+    class ServiceBean{
+        private Interface Interface;
+        private IntrospectedTable introspectedTable;
+
+        public Interface getInterface() {
+            return Interface;
+        }
+
+        public void setInterface(Interface anInterface) {
+            Interface = anInterface;
+        }
+
+        public IntrospectedTable getIntrospectedTable() {
+            return introspectedTable;
+        }
+
+        public void setIntrospectedTable(IntrospectedTable introspectedTable) {
+            this.introspectedTable = introspectedTable;
+        }
     }
 }
